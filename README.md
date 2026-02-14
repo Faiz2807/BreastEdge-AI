@@ -21,7 +21,56 @@ Trained on 157,572 balanced histopathology images:
 - **Specificity**: 84.50% (benign detection)
 - **AUC-ROC**: 0.9508
 
-## Installation
+## Advanced Metrics
+
+Comprehensive evaluation on full test set (41,627 images):
+
+### Model Discrimination
+- **ROC AUC**: 0.9485 — Excellent discrimination ability
+- **Average Precision**: 0.8702 — Strong performance on imbalanced dataset
+
+### Test Performance
+- **Accuracy**: 86.06%
+- **Sensitivity**: 93.68% (malignant detection)
+- **Specificity**: 83.04% (benign detection)
+
+### Model Calibration
+- **Expected Calibration Error (ECE)**: 0.1315
+  - Indicates moderate over-confidence (threshold: <0.05 well-calibrated)
+  - Recommendation: Apply temperature scaling for clinical deployment
+  - Impact: Confidence scores require calibration before clinical use
+
+### Visualization Plots
+
+Publication-ready plots (300 DPI) available in `metrics_plots/`:
+
+1. **ROC Curve** (`roc_curve.png`)
+   - Shows true positive rate vs false positive rate
+   - AUC 0.9485 indicates excellent model discrimination
+
+2. **Precision-Recall Curve** (`precision_recall_curve.png`)
+   - Critical for imbalanced medical datasets
+   - Average Precision 0.8702
+
+3. **Confidence Distribution** (`confidence_distribution.png`)
+   - Separate histograms for benign vs malignant predictions
+   - Shows model confidence separation between classes
+
+4. **Calibration Plot** (`calibration_plot.png`)
+   - Compares predicted confidence to actual accuracy
+   - ECE 0.1315 visible as deviation from diagonal
+   - Suggests need for post-hoc calibration
+
+### Clinical Interpretation
+
+- **Excellent discrimination** (AUC > 0.94): Model reliably separates benign from malignant
+- **High sensitivity** (93.68%): Catches most cancer cases (low false negatives)
+- **Good specificity** (83.04%): Acceptable false positive rate for screening
+- **Calibration needed**: Confidence scores not yet reliable for clinical decision-making
+
+For detailed metrics, see `metrics_plots/advanced_metrics.json`.
+
+
 
 ### Requirements
 
@@ -134,7 +183,80 @@ Natural Language Clinical Explanation
 - 4B parameters, bfloat16 precision
 - Generates clinical explanations for predictions
 
-## Dataset
+## Few-shot Prompting
+
+BreastEdge AI uses **few-shot prompting** to improve the quality and consistency of MedGemma 1.5 explanations.
+
+### Approach
+
+Instead of simple zero-shot prompts, we provide MedGemma with:
+1. **Role establishment**: "You are a board-certified pathologist"
+2. **Clinical examples**: 2 concrete cases (benign vs malignant features)
+3. **Structured output request**: 3-point assessment format
+4. **CNN prediction context**: Includes classifier confidence
+
+### Prompt Template
+
+```
+You are a board-certified pathologist analyzing breast histopathology patches 
+for invasive ductal carcinoma (IDC).
+
+Example 1: A patch showing uniform, well-organized glandular structures with 
+regular nuclei → Classification: BENIGN
+
+Example 2: A patch showing irregular, densely packed cells with enlarged nuclei 
+and loss of normal architecture → Classification: MALIGNANT (IDC positive)
+
+Now analyze this histopathology patch. The CNN classifier predicted [PREDICTION] 
+with [CONFIDENCE]% confidence.
+
+Provide:
+1. Your assessment of the tissue patterns visible
+2. Whether you agree with the CNN classification  
+3. Key histological features supporting your assessment
+
+Keep your response concise (2-3 sentences).
+```
+
+### Benefits Over Baseline
+
+Comparison on 5 test images (see `fewshot_results/`):
+
+| Metric | Baseline | Few-shot | Improvement |
+|--------|----------|----------|-------------|
+| **Avg. length** | 842 chars | 497 chars | **41% more concise** |
+| **Agreement accuracy** | 80% (1 error) | 100% | **More reliable** |
+| **Structure** | Variable | Consistent 3-point | **Better format** |
+| **Terminology** | Educational | Clinical pathology | **More professional** |
+
+### Key Improvements
+
+1. **Reliability**: 100% agreement with CNN predictions vs 80% baseline
+2. **Conciseness**: 41% shorter responses while maintaining clinical value
+3. **Structure**: Consistent 3-point format every time
+4. **Terminology**: Uses professional pathology language ("nuclear pleomorphism", "mitotic activity")
+5. **Borderline cases**: Better handling of uncertain predictions (69.6% confidence)
+
+### Implementation
+
+Few-shot prompting is implemented in `prompts.py` and integrated into the Gradio interface (`app.py`):
+
+```python
+from prompts import get_fewshot_prompt
+
+# Generate structured clinical explanation
+prompt = get_fewshot_prompt(prediction_class, confidence)
+explanation = medgemma.generate(prompt)
+```
+
+For detailed comparison and results, see:
+- `fewshot_results/comparison_report.md` — Side-by-side comparison
+- `fewshot_results/FEWSHOT_RESULTS_SUMMARY.md` — Analysis and recommendations
+- `test_fewshot.py` — Reproducible testing script
+
+
+
+
 
 - **Source**: BreakHis (Breast Cancer Histopathological Database)
 - **Total images**: 555,048 PNG patches (50x50 pixels)
