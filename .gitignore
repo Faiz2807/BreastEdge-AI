@@ -1,44 +1,47 @@
 # Model checkpoints (too large for GitHub)
 *.pth
-*.pt
-best_model_full.pth
-best_model.pth
+best_model*.pth
+monai_breast_classifier_full/
+
+# Training data
+breast_data/
 
 # Python cache
 __pycache__/
-*.py[cod]
-*.class
-*.so
+*.pyc
+*.pyo
+*.egg-info/
 .Python
 
-# Virtual environments
-venv/
-env/
-ENV/
-
 # Jupyter
-.ipynb_checkpoints
+.ipynb_checkpoints/
+*.ipynb
 
-# Logs
-*.log
-*.out
-gradio.out
-
-# Screenshots & videos
-screenshot_*.png
-*.mp4
-*.avi
-
-# Test outputs
-demo_outputs/*.txt
-
-# macOS
-.DS_Store
-
-# Editor
+# IDE
 .vscode/
 .idea/
 *.swp
+*.swo
 
-# Hugging Face cache
-.cache/
+# OS
+.DS_Store
+Thumbs.db
+
+# Gradio cache
+gradio_cached_examples/
+
+# Screenshots and videos
+*.png
+*.jpg
+*.jpeg
+*.mp4
+*.avi
+!demo_images/*.png
+
+# Logs
+*.log
+
+# Environment
+venv/
+env/
+ENV/
