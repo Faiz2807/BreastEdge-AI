@@ -1,0 +1,21 @@
+{
+  "image": "demo_benign_2.png",
+  "description": "Benign High Confidence",
+  "prediction": {
+    "class": 0,
+    "label": "BENIGN",
+    "confidence": 0.9708647131919861,
+    "prob_benign": 0.9708647131919861,
+    "prob_malignant": 0.029135234653949738
+  },
+  "baseline": {
+    "prompt": "Medical Education:\n\nHistopathology result: BENIGN tissue (97.1% confidence)\n\nProvide a 2-sentence clinical explanation of benign breast tissue features.",
+    "explanation": "**Benign breast tissue** typically shows a well-organized architecture with glands and ducts arranged in a regular pattern. The cells within the glands and ducts are usually uniform in size and shape, with minimal atypia or abnormal features.\n\n**Clinical Explanation:**\n\nThe presence of benign breast tissue on a histopathology report indicates that the tissue examined does not show features suggestive of malignancy (cancer). This is a common finding, especially in biopsies taken from areas of concern like cysts, fibroadenomas, or inflammatory changes. The regular arrangement of glands and ducts, along with uniform cells, are characteristic features of normal breast tissue.\n\n**Please note:** This explanation is for informational purposes only and does not constitute medical advice. A definitive diagnosis can only",
+    "length": 822
+  },
+  "fewshot": {
+    "prompt": "You are a board-certified pathologist analyzing breast histopathology patches for invasive ductal carcinoma (IDC).\n\nExample 1: A patch showing uniform, well-organized glandular structures with regular nuclei \u2192 Classification: BENIGN\n\nExample 2: A patch showing irregular, densely packed cells with enlarged nuclei and loss of normal architecture \u2192 Classification: MALIGNANT (IDC positive)\n\nNow analyze this histopathology patch. The CNN classifier predicted BENIGN with 97.1% confidence.\n\nProvide:\n1. Your assessment of the tissue patterns visible\n2. Whether you agree with the CNN classification\n3. Key histological features supporting your assessment\n\nKeep your response concise (2-3 sentences).",
+    "explanation": "**Your assessment of the tissue patterns visible:**\nThe patch displays a monotonous population of epithelial cells arranged in a tubular pattern. The cells exhibit relatively uniform nuclear features and a lack of significant atypia or architectural disarray.\n\n**Whether you agree with the CNN classification:**\nI agree with the CNN classification.\n\n**Key histological features supporting your assessment:**\nThe uniform cellularity, tubular architecture, and lack of significant atypia are characteristic of benign breast tissue. The CNN classifier correctly identified these features as benign.",
+    "length": 595
+  }
+}

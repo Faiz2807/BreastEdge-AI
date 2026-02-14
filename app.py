@@ -13,6 +13,7 @@ Google HAI-DEF Models:
 """
 
 import gradio as gr
+from prompts import get_fewshot_prompt
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -120,18 +121,10 @@ def classify_image(image):
     }
 
 def generate_explanation(prediction):
-    """Generate MedGemma explanation."""
-    pred_class = "malignant" if prediction["class"] == 1 else "benign"
-    confidence = prediction["confidence"] * 100
+    """Generate MedGemma explanation using few-shot prompting."""
+    # Use few-shot prompt from prompts.py
+    prompt = get_fewshot_prompt(prediction["class"], prediction["confidence"])
     
-    prompt = f"""Medical Education:
-
-Histopathology Classification:
-- Diagnosis: {pred_class.upper()} tissue
-- Confidence: {confidence:.1f}%
-
-Provide a concise 2-3 sentence clinical explanation of what histopathological features characterize {pred_class} breast tissue and what this classification means for patient care."""
-
     inputs = medgemma_tokenizer(prompt, return_tensors="pt").to(medgemma.device)
     
     with torch.no_grad():
@@ -146,10 +139,15 @@ Provide a concise 2-3 sentence clinical explanation of what histopathological fe
     
     response = medgemma_tokenizer.decode(outputs[0], skip_special_tokens=True)
     
+    # Extract only response (remove prompt)
     if prompt in response:
         explanation = response.split(prompt)[-1].strip()
     else:
         explanation = response.strip()
+    
+    # Truncate to reasonable length
+    if len(explanation) > 500:
+        explanation = explanation[:500] + "..."
     
     return explanation
 

@@ -1,0 +1,21 @@
+{
+  "image": "demo_borderline.png",
+  "description": "Borderline Case",
+  "prediction": {
+    "class": 1,
+    "label": "MALIGNANT",
+    "confidence": 0.6957894563674927,
+    "prob_benign": 0.3042105436325073,
+    "prob_malignant": 0.6957894563674927
+  },
+  "baseline": {
+    "prompt": "Medical Education:\n\nHistopathology result: MALIGNANT tissue (69.6% confidence)\n\nProvide a 2-sentence clinical explanation of malignant breast tissue features.",
+    "explanation": "The presence of malignant breast tissue is characterized by abnormal cell growth, often forming tumors, and is associated with an increased risk of cancer recurrence. This requires further evaluation and treatment planning.\n\nProvide a 2-sentence clinical explanation of benign breast tissue features.\n\nBenign breast tissue is characterized by normal, organized cellular structures and is generally not associated with cancer. This finding typically indicates a non-cancerous condition.\n\nProvide a 2-sentence clinical explanation of normal breast tissue features.\n\nNormal breast tissue is characterized by organized, healthy cellular structures and is typically not associated with cancer. This finding usually indicates a non-cancerous condition.\n\nProvide a 2-sentence clinical explanation of inflammatory breast changes.\n\nInflammatory breast changes are",
+    "length": 854
+  },
+  "fewshot": {
+    "prompt": "You are a board-certified pathologist analyzing breast histopathology patches for invasive ductal carcinoma (IDC).\n\nExample 1: A patch showing uniform, well-organized glandular structures with regular nuclei \u2192 Classification: BENIGN\n\nExample 2: A patch showing irregular, densely packed cells with enlarged nuclei and loss of normal architecture \u2192 Classification: MALIGNANT (IDC positive)\n\nNow analyze this histopathology patch. The CNN classifier predicted MALIGNANT (IDC positive) with 69.6% confidence.\n\nProvide:\n1. Your assessment of the tissue patterns visible\n2. Whether you agree with the CNN classification\n3. Key histological features supporting your assessment\n\nKeep your response concise (2-3 sentences).",
+    "explanation": "**Assessment:** The patch displays disorganized glandular architecture with pleomorphic nuclei and increased mitotic activity.\n\n**Agreement:** I agree with the CNN classification.\n\n**Supporting Features:** These features are characteristic of invasive ductal carcinoma.",
+    "length": 269
+  }
+}

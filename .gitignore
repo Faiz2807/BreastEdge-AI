@@ -37,6 +37,7 @@ gradio_cached_examples/
 *.mp4
 *.avi
 !demo_images/*.png
+!metrics_plots/*.png
 
 # Logs
 *.log

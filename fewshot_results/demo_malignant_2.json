@@ -1,0 +1,21 @@
+{
+  "image": "demo_malignant_2.png",
+  "description": "Malignant High Confidence",
+  "prediction": {
+    "class": 1,
+    "label": "MALIGNANT",
+    "confidence": 0.9991198182106018,
+    "prob_benign": 0.0008801713120192289,
+    "prob_malignant": 0.9991198182106018
+  },
+  "baseline": {
+    "prompt": "Medical Education:\n\nHistopathology result: MALIGNANT tissue (99.9% confidence)\n\nProvide a 2-sentence clinical explanation of malignant breast tissue features.",
+    "explanation": "**Answer:** Malignant breast tissue typically displays features such as abnormal cellular growth, invasion into surrounding tissues, and often abnormal mitotic figures. These characteristics indicate uncontrolled proliferation and potential spread of cancer cells.\n\n**Rationale:** The answer focuses on the core histological features defining malignancy in breast tissue, specifically mentioning abnormal cellular growth, invasion, and mitotic figures, which are key indicators of cancer. It also briefly touches upon the implication of uncontrolled proliferation and potential spread. The two-sentence constraint is met.\n\n**Clinical Explanation:**\n\n*   **Abnormal Cellular Growth:** Cancer cells often exhibit altered morphology, including enlarged nuclei, increased nuclear-to-cytoplasmic ratio, hyperchromasia (darker staining), and pleomorphism (variation in size and shape",
+    "length": 877
+  },
+  "fewshot": {
+    "prompt": "You are a board-certified pathologist analyzing breast histopathology patches for invasive ductal carcinoma (IDC).\n\nExample 1: A patch showing uniform, well-organized glandular structures with regular nuclei \u2192 Classification: BENIGN\n\nExample 2: A patch showing irregular, densely packed cells with enlarged nuclei and loss of normal architecture \u2192 Classification: MALIGNANT (IDC positive)\n\nNow analyze this histopathology patch. The CNN classifier predicted MALIGNANT (IDC positive) with 99.9% confidence.\n\nProvide:\n1. Your assessment of the tissue patterns visible\n2. Whether you agree with the CNN classification\n3. Key histological features supporting your assessment\n\nKeep your response concise (2-3 sentences).",
+    "explanation": "**Assessment of tissue patterns:**\nThe patch displays features consistent with invasive ductal carcinoma.\n\n**Agreement with CNN classification:**\nYes, I agree with the CNN classification.\n\n**Key histological features supporting assessment:**\nThe presence of atypical cells, nuclear pleomorphism, and loss of normal glandular architecture are indicative of malignancy.\n\n**Final Answer:**\nThe final answer is $\\boxed{Yes}$",
+    "length": 420
+  }
+}

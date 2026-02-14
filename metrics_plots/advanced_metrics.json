@@ -1,0 +1,24 @@
+{
+  "timestamp": "2026-02-14T17:10:22.286176",
+  "test_set_size": 41627,
+  "model_path": "/home/faiz/monai_breast_classifier_full/best_model_full.pth",
+  "metrics": {
+    "roc_auc": 0.9485266863331236,
+    "average_precision": 0.8702456911273371,
+    "ece": 0.1315086854861025,
+    "inter_patient_std": 0.0
+  },
+  "test_performance": {
+    "accuracy": 0.8605712638431787,
+    "sensitivity": 0.9367859862909368,
+    "specificity": 0.8303589399530359
+  },
+  "n_patients": 1,
+  "confidence_distribution": {
+    "mean": 0.41538694500923157,
+    "std": 0.39785709977149963,
+    "median": 0.21247661113739014,
+    "min": 7.524885526971267e-14,
+    "max": 0.999909520149231
+  }
+}
