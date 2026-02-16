@@ -6,358 +6,113 @@ Running 100% locally on NVIDIA DGX Spark — Zero cloud dependency
 
 ## Overview
 
-BreastEdge AI is a medical AI system for automated breast cancer detection from histopathology images, powered by three official Google Health AI Developer Foundations (HAI-DEF) models:
+BreastEdge AI is a medical AI system for automated breast cancer detection from histopathology images, powered by three Google Health AI Developer Foundations (HAI-DEF) models in a sequential pipeline:
 
-- **MedSigLIP-448**: Medical image encoder
-- **ResNet50**: Breast cancer classifier (87.92% accuracy)
-- **MedGemma 1.5**: Medical explanation AI
+- **MedSigLIP-448** (0.9B params): Medical image feature extraction
+- **ResNet50/MONAI** (23.5M params): Binary classification (benign/malignant)
+- **MedGemma 1.5 4B-it** (4.3B params): Clinical explanation generation
 
-## Performance
+## Performance — Independently Verified
 
-Trained on 157,572 balanced histopathology images:
+Metrics verified through independent testing on 2,000 randomly sampled images (seed 777), separate from training validation:
 
-- **Accuracy**: 87.92%
-- **Sensitivity**: 91.34% (malignant detection)
-- **Specificity**: 84.50% (benign detection)
-- **AUC-ROC**: 0.9508
+| Metric | Verified Result | Validation Set |
+|--------|----------------|----------------|
+| **Accuracy** | **81.85%** | 87.65% |
+| **Sensitivity** | **85.30%** | — |
+| **Specificity** | **78.40%** | — |
+| Test Set Size | 2,000 random | 23,636 (train split) |
 
-## Advanced Metrics
+> **Transparency note:** Our initial validation set reported 87.65% accuracy. Independent testing on a random global sample confirmed 81.85%. We report the independently verified figures. The ~6-point gap is consistent with expected generalization from validation to held-out test data.
 
-Comprehensive evaluation on full test set (41,627 images):
+## Architecture
 
-### Model Discrimination
-- **ROC AUC**: 0.9485 — Excellent discrimination ability
-- **Average Precision**: 0.8702 — Strong performance on imbalanced dataset
-
-### Test Performance
-- **Accuracy**: 86.06%
-- **Sensitivity**: 93.68% (malignant detection)
-- **Specificity**: 83.04% (benign detection)
-
-### Model Calibration
-- **Expected Calibration Error (ECE)**: 0.1315
-  - Indicates moderate over-confidence (threshold: <0.05 well-calibrated)
-  - Recommendation: Apply temperature scaling for clinical deployment
-  - Impact: Confidence scores require calibration before clinical use
-
-### Visualization Plots
-
-Publication-ready plots (300 DPI) available in `metrics_plots/`:
-
-1. **ROC Curve** (`roc_curve.png`)
-   - Shows true positive rate vs false positive rate
-   - AUC 0.9485 indicates excellent model discrimination
-
-2. **Precision-Recall Curve** (`precision_recall_curve.png`)
-   - Critical for imbalanced medical datasets
-   - Average Precision 0.8702
-
-3. **Confidence Distribution** (`confidence_distribution.png`)
-   - Separate histograms for benign vs malignant predictions
-   - Shows model confidence separation between classes
-
-4. **Calibration Plot** (`calibration_plot.png`)
-   - Compares predicted confidence to actual accuracy
-   - ECE 0.1315 visible as deviation from diagonal
-   - Suggests need for post-hoc calibration
-
-### Clinical Interpretation
-
-- **Excellent discrimination** (AUC > 0.94): Model reliably separates benign from malignant
-- **High sensitivity** (93.68%): Catches most cancer cases (low false negatives)
-- **Good specificity** (83.04%): Acceptable false positive rate for screening
-- **Calibration needed**: Confidence scores not yet reliable for clinical decision-making
-
-For detailed metrics, see `metrics_plots/advanced_metrics.json`.
-
-
-
-### Requirements
-
-- Python 3.10+
-- CUDA-capable GPU (tested on NVIDIA DGX Spark GB10, 119GB unified memory)
-- Ubuntu 22.04+ (or compatible Linux)
-
-### Dependencies
-
-```bash
-pip install -r requirements.txt
+```
+Input Image (50×50 patch)
+    ↓
+MedSigLIP-448 → Feature extraction (medical visual embeddings)
+    ↓
+ResNet50/MONAI → Classification: BENIGN or MALIGNANT + confidence score
+    ↓
+MedGemma 1.5 → Clinical explanation in 3 sections:
+                 1. Tissue Architecture
+                 2. Cellular Features
+                 3. Clinical Correlation
 ```
 
-### Models
+All three models run simultaneously on a single NVIDIA DGX Spark (128GB unified memory), using only 11.4GB VRAM. Processing time: ~15-25 seconds per image.
 
-Models are automatically downloaded from Hugging Face on first run:
+## Hardware
 
-- `google/medsiglip-448` (requires Hugging Face account approval)
-- `google/medgemma-1.5-4b-it`
-- Custom ResNet50 checkpoint: `best_model_full.pth`
+| Specification | Value |
+|--------------|-------|
+| Device | NVIDIA DGX Spark |
+| GPU | NVIDIA GB10 (Grace Blackwell) |
+| Memory | 128 GB unified |
+| CUDA | 12.8 / Driver 580.95 |
+| VRAM used | 11.4 / 119.7 GB (3 models loaded) |
+| Network required | None (100% offline) |
 
-## Usage
+## Dataset
 
-### Gradio Web Interface
+**Breast Histopathology Images** (Kaggle) — 555,048 patches of 50×50 pixels extracted from 280 patients. Training on 157,572 balanced images (50/50 benign/malignant).
+
+## What We Tried and What Failed
+
+Transparency on our iterative process:
+
+| Approach | Result | Lesson |
+|----------|--------|--------|
+| MedGemma 4B as direct classifier | 60% sensitivity | VLM not suited for binary classification on small patches |
+| LoRA fine-tuning MedGemma | 0% sensitivity (predicted all benign) | 4B model too small for effective fine-tuning on histopathology |
+| MedSigLIP + ResNet50 pipeline | **85.3% sensitivity** | Specialized encoder + classifier outperforms generalist VLM |
+| MedGemma as explainer (few-shot) | Correct clinical terminology | Best role: interpretation, not classification |
+
+## Why Edge AI Matters for Breast Cancer
+
+- **Morocco has ~150 pathologists** for 37 million people
+- Rural clinics have no reliable internet for cloud AI
+- Patient data sovereignty requires local processing
+- A DGX Spark costs less than one year of cloud GPU rental
+
+## Clinical Validation
+
+Planned validation with Dr. Amal, Head of Radiology at CHU Cheikh Khalifa (Rabat), including testing on 10 clinical histopathology specimens. Results pending.
+
+## Running the Dashboard
 
 ```bash
-python3 app.py
-```
+# SSH into DGX Spark
+ssh faiz@192.168.1.237
 
-Access at: `http://localhost:7860`
+# Start the server
+cd ~/breast_edge_ai
+python3 server.py
 
-### Command Line Interface
-
-Test a single image:
-
-```bash
-python3 test_cli.py path/to/image.png
-```
-
-Test all demo images:
-
-```bash
-python3 test_all_demos.py
+# Open in browser
+# http://192.168.1.237:7860
 ```
 
 ## Project Structure
 
 ```
 breast_edge_ai/
-├── app.py                          # Gradio web interface
-├── test_cli.py                     # CLI inference script
-├── test_all_demos.py              # Batch test demo images
-├── select_demo_images.py          # Select diverse demo images
-├── post_production.py             # Video post-production
-├── requirements.txt               # Python dependencies
-├── README.md                      # This file
-├── demo_images/                   # 5 diverse test cases
-│   ├── demo_benign_1.png
-│   ├── demo_benign_2.png
-│   ├── demo_malignant_1.png
-│   ├── demo_malignant_2.png
-│   └── demo_borderline.png
-└── demo_outputs/                  # CLI test results
-    ├── demo_benign_1.txt
-    ├── demo_benign_2.txt
-    ├── demo_malignant_1.txt
-    ├── demo_malignant_2.txt
-    └── demo_borderline.txt
-```
-
-## Architecture
-
-### Pipeline Flow
-
-```
-Input Image (50x50 PNG)
-    ↓
-[MedSigLIP-448]
-    ↓
-Medical Feature Embedding (1152-dim)
-    ↓
-[ResNet50 Classifier]
-    ↓
-Binary Classification (Benign/Malignant) + Confidence
-    ↓
-[MedGemma 1.5]
-    ↓
-Natural Language Clinical Explanation
-```
-
-### Model Details
-
-**MedSigLIP-448**
-- Official Google HAI-DEF medical image encoder
-- Pre-trained on medical imaging datasets
-- Tags: medical, pathology, radiology, dermatology, ophthalmology
-- Output: 1152-dimensional embedding
-
-**ResNet50**
-- MONAI implementation
-- Trained on 157,572 balanced histopathology patches
-- 23.5M parameters
-- Training splits: 70% train, 15% val, 15% test
-- Data augmentation: horizontal + vertical flips
-- Optimizer: AdamW (LR 0.0001)
-- 5 epochs, batch size 32
-
-**MedGemma 1.5**
-- Google's medical language model
-- 4B parameters, bfloat16 precision
-- Generates clinical explanations for predictions
-
-## Few-shot Prompting
-
-BreastEdge AI uses **few-shot prompting** to improve the quality and consistency of MedGemma 1.5 explanations.
-
-### Approach
-
-Instead of simple zero-shot prompts, we provide MedGemma with:
-1. **Role establishment**: "You are a board-certified pathologist"
-2. **Clinical examples**: 2 concrete cases (benign vs malignant features)
-3. **Structured output request**: 3-point assessment format
-4. **CNN prediction context**: Includes classifier confidence
-
-### Prompt Template
-
-```
-You are a board-certified pathologist analyzing breast histopathology patches 
-for invasive ductal carcinoma (IDC).
-
-Example 1: A patch showing uniform, well-organized glandular structures with 
-regular nuclei → Classification: BENIGN
-
-Example 2: A patch showing irregular, densely packed cells with enlarged nuclei 
-and loss of normal architecture → Classification: MALIGNANT (IDC positive)
-
-Now analyze this histopathology patch. The CNN classifier predicted [PREDICTION] 
-with [CONFIDENCE]% confidence.
-
-Provide:
-1. Your assessment of the tissue patterns visible
-2. Whether you agree with the CNN classification  
-3. Key histological features supporting your assessment
-
-Keep your response concise (2-3 sentences).
-```
-
-### Benefits Over Baseline
-
-Comparison on 5 test images (see `fewshot_results/`):
-
-| Metric | Baseline | Few-shot | Improvement |
-|--------|----------|----------|-------------|
-| **Avg. length** | 842 chars | 497 chars | **41% more concise** |
-| **Agreement accuracy** | 80% (1 error) | 100% | **More reliable** |
-| **Structure** | Variable | Consistent 3-point | **Better format** |
-| **Terminology** | Educational | Clinical pathology | **More professional** |
-
-### Key Improvements
-
-1. **Reliability**: 100% agreement with CNN predictions vs 80% baseline
-2. **Conciseness**: 41% shorter responses while maintaining clinical value
-3. **Structure**: Consistent 3-point format every time
-4. **Terminology**: Uses professional pathology language ("nuclear pleomorphism", "mitotic activity")
-5. **Borderline cases**: Better handling of uncertain predictions (69.6% confidence)
-
-### Implementation
-
-Few-shot prompting is implemented in `prompts.py` and integrated into the Gradio interface (`app.py`):
-
-```python
-from prompts import get_fewshot_prompt
-
-# Generate structured clinical explanation
-prompt = get_fewshot_prompt(prediction_class, confidence)
-explanation = medgemma.generate(prompt)
-```
-
-For detailed comparison and results, see:
-- `fewshot_results/comparison_report.md` — Side-by-side comparison
-- `fewshot_results/FEWSHOT_RESULTS_SUMMARY.md` — Analysis and recommendations
-- `test_fewshot.py` — Reproducible testing script
-
-
-
-
-
-- **Source**: BreakHis (Breast Cancer Histopathological Database)
-- **Total images**: 555,048 PNG patches (50x50 pixels)
-- **Classes**:
-  - Benign: 397,476 patches
-  - Malignant: 157,572 patches
-- **Training set**: 157,572 balanced (78,786 each class)
-
-## Training
-
-```bash
-python3 full_training_resnet50.py
-```
-
-Training configuration:
-- 157K balanced images
-- ResNet50 architecture
-- 5 epochs
-- Batch size: 32
-- Learning rate: 0.0001
-- Optimizer: AdamW
-- Data augmentation: random horizontal/vertical flips
-- Loss: CrossEntropyLoss
-
-## API Reference
-
-### CLI Interface
-
-```python
-python3 test_cli.py <image_path>
-```
-
-Output:
-- Prediction: BENIGN/MALIGNANT
-- Confidence score
-- Class probabilities
-- MedGemma clinical explanation
-
-### Gradio Interface
-
-Upload histopathology image → Get:
-- Visual prediction (Benign/Malignant)
-- Confidence bar
-- Clinical explanation
-- Feature embedding heatmap
-
-## Edge Deployment
-
-**Hardware**: NVIDIA DGX Spark GB10
-- 119 GB unified memory
-- CUDA 13.0
-- Ubuntu 22.04
-
-**Advantages**:
-- **100% local inference** — no cloud API calls
-- **Zero latency** — no network dependency
-- **Data privacy** — patient data never leaves device
-- **Offline capable** — works without internet
-- **Low cost** — no per-inference API fees
-
-## Limitations
-
-- Trained on BreakHis dataset (specific staining/microscopy setup)
-- Binary classification only (benign/malignant)
-- No subtype classification
-- Requires high-quality 50x50 patches
-- **For research and educational purposes only**
-- Not FDA-approved for clinical use
-
-## Citation
-
-```bibtex
-@software{breastedge_ai_2026,
-  author = {Ferhat, Driss Faiz},
-  title = {BreastEdge AI: Edge-Deployed Breast Cancer Histopathology Classifier},
-  year = {2026},
-  publisher = {INKWAY Consulting},
-  note = {Google Health AI Developer Foundations Competition Submission}
-}
+├── server.py                    # FastAPI backend (3 HAI-DEF models)
+├── static/index.html            # Professional medical dashboard
+├── verify_model.py              # Independent validation script (2000 images)
+├── advanced_metrics.py          # ROC, PR, ECE, calibration plots
+├── validate_pipeline.py         # End-to-end pipeline validation
+├── metrics_plots/               # Publication-ready plots (300 DPI)
+└── demo_images/                 # Sample histopathology images
 ```
 
 ## License
 
-MIT License
+This project was created for the MedGemma Impact Challenge. The models used (MedSigLIP, MedGemma) are subject to Google's HAI-DEF licensing terms.
 
 ## Author
 
-**Driss Faiz Ferhat**  
-AI Solutions Architect | INKWAY Consulting  
-Rabat, Morocco  
-[LinkedIn](https://linkedin.com/in/driss-faiz-ferhat) | [GitHub](https://github.com/faizferhat)
+**Faiz Ferhat** — AI Solutions Architect, Rabat, Morocco
 
-## Acknowledgments
-
-- Google Health AI Developer Foundations (HAI-DEF)
-- MONAI Framework
-- BreakHis Dataset
-- Hugging Face Transformers
-
----
-
-**Competition**: Google Edge AI Prize Track ($100K)  
-**Track**: Medical AI on Edge Devices  
-**Submission**: February 2026
+- GitHub: [Faiz2807](https://github.com/Faiz2807)
+- Competition: [MedGemma Impact Challenge](https://www.kaggle.com/competitions/med-gemma-impact-challenge)
