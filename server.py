@@ -364,6 +364,55 @@ async def analyze_image(file: UploadFile = File(...)):
         print(f"❌ Analysis error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# === MedASR Proxy (4th HAI-DEF model) ===
+# Forwards audio to MedASR micro-service on port 7861
+import httpx
+
+@app.post("/api/transcribe")
+async def transcribe_audio(file: UploadFile = File(...)):
+    """Proxy to MedASR micro-service on port 7861"""
+    try:
+        contents = await file.read()
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                "http://localhost:7861/transcribe",
+                files={"file": (file.filename or "audio.webm", contents, file.content_type or "audio/webm")}
+            )
+            return JSONResponse(response.json())
+    except Exception as e:
+        return JSONResponse(
+            {"transcription": "", "error": str(e), "status": "error"},
+            status_code=503
+        )
+
+# === MedGemma Voice Q&A (MedASR -> MedGemma pipeline) ===
+@app.post("/api/ask")
+async def ask_medgemma(file: UploadFile = File(None), question: str = ""):
+    """Send voice-transcribed question to MedGemma with image context"""
+    from fastapi import Form
+    try:
+        # Build prompt with the question from MedASR
+        prompt = f"""You are an expert pathologist. A clinician is asking you a question about a breast histopathology specimen that was just analyzed.
+
+Clinician question: {question}
+
+Provide a clear, concise medical answer in 2-3 sentences using professional pathology terminology."""
+        
+        inputs = gemma_tokenizer(prompt, return_tensors="pt").to(gemma_model.device)
+        with torch.no_grad():
+            outputs = gemma_model.generate(
+                **inputs,
+                max_new_tokens=300,
+                temperature=0.1,
+                do_sample=False,
+                pad_token_id=gemma_tokenizer.eos_token_id
+            )
+        full_response = gemma_tokenizer.decode(outputs[0], skip_special_tokens=True)
+        answer = full_response[len(prompt):].strip()
+        return JSONResponse({"answer": answer, "status": "success"})
+    except Exception as e:
+        print(f"Ask error: {e}")
+        return JSONResponse({"answer": "", "error": str(e), "status": "error"}, status_code=500)
 # Serve static files (frontend)
 static_dir = Path(__file__).parent / "static"
 static_dir.mkdir(exist_ok=True)

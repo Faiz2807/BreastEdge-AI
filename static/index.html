@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BreastEdge AI - Professional Medical Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #0A1628;
+            --navy-light: #112240;
+            --teal: #00B4D8;
+            --teal-dark: #0096B4;
+            --teal-glow: rgba(0, 180, 216, 0.15);
+            --red: #E63946;
+            --red-glow: rgba(230, 57, 70, 0.15);
+            --green: #06D6A0;
+            --green-glow: rgba(6, 214, 160, 0.15);
+            --amber: #FFB703;
+            --amber-glow: rgba(255, 183, 3, 0.15);
+            --purple: #8B5CF6;
+            --purple-glow: rgba(139, 92, 246, 0.1);
+            --rose: #F43F5E;
+            --rose-glow: rgba(244, 63, 94, 0.1);
+            --bg: #F0F4F8;
+            --card: #FFFFFF;
+            --text: #1A1D29;
+            --text-secondary: #64748B;
+            --border: #E2E8F0;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+            --shadow-lg: 0 4px 24px rgba(0,0,0,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'DM Sans', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* ===== HEADER ===== */
+        .header {
+            background: var(--navy);
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+        }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .logo-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--teal), #0077B6);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+        .logo-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700; font-size: 20px;
+            color: #FFFFFF;
+            letter-spacing: -0.5px;
+        }
+        .badge {
+            background: rgba(0, 180, 216, 0.15);
+            border: 1px solid rgba(0, 180, 216, 0.3);
+            color: var(--teal);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 11px; font-weight: 600;
+            padding: 4px 12px; border-radius: 20px;
+            letter-spacing: 1px; text-transform: uppercase;
+        }
+        .model-count-badge {
+            background: rgba(255, 183, 3, 0.15);
+            border: 1px solid rgba(255, 183, 3, 0.3);
+            color: var(--amber);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 11px; font-weight: 600;
+            padding: 4px 12px; border-radius: 20px;
+            letter-spacing: 1px; text-transform: uppercase;
+        }
+        .header-right { display: flex; align-items: center; gap: 24px; }
+        .system-stat { display: flex; flex-direction: column; align-items: flex-end; }
+        .system-stat-label {
+            font-size: 10px; color: #64748B;
+            text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500;
+        }
+        .system-stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px; color: #CBD5E1; font-weight: 500;
+        }
+        .status-dot {
+            display: inline-block;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--green);
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* ===== MAIN LAYOUT ===== */
+        .main {
+            flex: 1; max-width: 1200px; width: 100%;
+            margin: 0 auto; padding: 32px 24px;
+        }
+        
+        /* ===== UPLOAD ZONE ===== */
+        .upload-section { margin-bottom: 32px; }
+        .upload-zone {
+            background: var(--card);
+            border: 2px dashed var(--border);
+            border-radius: 16px; padding: 48px;
+            text-align: center; cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative; overflow: hidden;
+        }
+        .upload-zone:hover {
+            border-color: var(--teal);
+            background: rgba(0, 180, 216, 0.02);
+        }
+        .upload-zone.dragover {
+            border-color: var(--teal);
+            background: var(--teal-glow);
+            transform: scale(1.01);
+        }
+        .upload-zone.has-image {
+            padding: 24px;
+            border-style: solid;
+            border-color: var(--border);
+        }
+        .upload-icon {
+            width: 64px; height: 64px;
+            margin: 0 auto 16px;
+            background: linear-gradient(135deg, var(--teal-glow), rgba(0, 119, 182, 0.1));
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+        }
+        .upload-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 18px; font-weight: 600;
+            color: var(--text); margin-bottom: 8px;
+        }
+        .upload-subtitle {
+            font-size: 14px; color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+        .upload-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--teal); color: white;
+            border: none; padding: 10px 24px; border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .upload-btn:hover {
+            background: var(--teal-dark);
+            transform: translateY(-1px);
+        }
+        .upload-preview { display: none; align-items: center; gap: 16px; }
+        .upload-zone.has-image .upload-placeholder { display: none; }
+        .upload-zone.has-image .upload-preview { display: flex; }
+        .preview-thumb {
+            width: 80px; height: 80px;
+            border-radius: 8px; object-fit: cover;
+            border: 2px solid var(--border);
+        }
+        .preview-info { text-align: left; flex: 1; }
+        .preview-name { font-weight: 600; font-size: 14px; color: var(--text); }
+        .preview-meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+        .analyze-btn {
+            background: linear-gradient(135deg, var(--teal), #0077B6);
+            color: white; border: none;
+            padding: 12px 32px; border-radius: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 15px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+            letter-spacing: 0.3px;
+        }
+        .analyze-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0, 180, 216, 0.3);
+        }
+        .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .change-btn {
+            background: none; border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 8px 16px; border-radius: 6px;
+            font-size: 12px; cursor: pointer; transition: all 0.2s;
+        }
+        .change-btn:hover { border-color: var(--teal); color: var(--teal); }
+        
+        /* ===== LOADING ===== */
+        .loading-section { display: none; text-align: center; padding: 48px; }
+        .loading-section.active { display: block; }
+        .spinner {
+            width: 48px; height: 48px;
+            border: 3px solid var(--border);
+            border-top-color: var(--teal);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 14px; color: var(--text-secondary); }
+        .loading-step {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 13px; color: var(--teal);
+            margin-top: 8px; font-weight: 500;
+        }
+        
+        /* ===== RESULTS ===== */
+        .results-section { display: none; animation: fadeUp 0.5s ease; }
+        .results-section.active { display: block; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Verdict Card */
+        .verdict-card {
+            background: var(--card);
+            border-radius: 16px; padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid transparent;
+            position: relative; overflow: hidden;
+        }
+        .verdict-card.malignant { border-left-color: var(--red); }
+        .verdict-card.benign { border-left-color: var(--green); }
+        .verdict-card::before {
+            content: ''; position: absolute;
+            top: 0; right: 0;
+            width: 200px; height: 200px;
+            border-radius: 50%; opacity: 0.04;
+            pointer-events: none;
+        }
+        .verdict-card.malignant::before { background: var(--red); }
+        .verdict-card.benign::before { background: var(--green); }
+        .verdict-top {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .verdict-label-group { display: flex; align-items: center; gap: 16px; }
+        .verdict-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+        }
+        .verdict-card.malignant .verdict-icon { background: var(--red-glow); }
+        .verdict-card.benign .verdict-icon { background: var(--green-glow); }
+        .verdict-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 28px; font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .verdict-card.malignant .verdict-text { color: var(--red); }
+        .verdict-card.benign .verdict-text { color: var(--green); }
+        .verdict-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+        .confidence-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 36px; font-weight: 700; color: var(--text);
+        }
+        .confidence-label { font-size: 12px; color: var(--text-secondary); text-align: right; }
+        .confidence-bar-container {
+            background: #F1F5F9;
+            border-radius: 8px; height: 12px;
+            overflow: hidden; position: relative;
+        }
+        .confidence-bar {
+            height: 100%; border-radius: 8px;
+            transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+            width: 0;
+        }
+        .verdict-card.malignant .confidence-bar {
+            background: linear-gradient(90deg, var(--amber), var(--red));
+        }
+        .verdict-card.benign .confidence-bar {
+            background: linear-gradient(90deg, var(--teal), var(--green));
+        }
+        
+        /* Grid */
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .card-header-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+        .card-header-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px; font-weight: 600; color: var(--text);
+        }
+        .card-header-badge {
+            font-size: 10px; font-weight: 600;
+            padding: 2px 8px; border-radius: 4px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-left: auto;
+        }
+        .card-body { padding: 24px; }
+        .images-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .image-panel { text-align: center; }
+        .image-panel-label {
+            font-size: 11px; font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .image-panel img {
+            width: 100%; aspect-ratio: 1;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #FAFBFC;
+        }
+        
+        /* Explanation */
+        .explanation-content { display: flex; flex-direction: column; gap: 16px; }
+        .explanation-item {
+            display: flex; gap: 12px;
+            padding: 14px 16px;
+            background: #F8FAFC;
+            border-radius: 10px;
+            border-left: 3px solid transparent;
+        }
+        .explanation-item.architecture { border-left-color: var(--teal); }
+        .explanation-item.cellular { border-left-color: var(--purple); }
+        .explanation-item.clinical { border-left-color: var(--amber); }
+        .explanation-item.dictation { border-left-color: var(--rose); }
+        .explanation-item-number {
+            width: 24px; height: 24px;
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12px; font-weight: 700;
+            color: white; flex-shrink: 0; margin-top: 1px;
+        }
+        .explanation-item.architecture .explanation-item-number { background: var(--teal); }
+        .explanation-item.cellular .explanation-item-number { background: var(--purple); }
+        .explanation-item.clinical .explanation-item-number { background: var(--amber); }
+        .explanation-item.dictation .explanation-item-number { background: var(--rose); }
+        .explanation-item-content { flex: 1; }
+        .explanation-item-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12px; font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.3px;
+            margin-bottom: 4px;
+        }
+        .explanation-item-text {
+            font-size: 13px; color: var(--text); line-height: 1.5;
+        }
+        
+        /* ===== DICTATION SECTION ===== */
+        .dictation-section {
+            display: none;
+            margin-bottom: 24px;
+            animation: fadeUp 0.5s ease;
+        }
+        .dictation-section.active { display: block; }
+        .dictation-card {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .dictation-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .dictation-header-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            background: var(--rose-glow);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+        .dictation-body { padding: 24px; }
+        .dictation-controls {
+            display: flex; align-items: center; gap: 16px;
+            margin-bottom: 16px;
+        }
+        .dictate-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 24px; border-radius: 10px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+            border: 2px solid var(--rose);
+            background: white; color: var(--rose);
+        }
+        .dictate-btn:hover {
+            background: var(--rose-glow);
+            transform: translateY(-1px);
+        }
+        .dictate-btn.recording {
+            background: var(--rose);
+            color: white;
+            animation: pulse-record 1.5s infinite;
+        }
+        @keyframes pulse-record {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4); }
+            50% { box-shadow: 0 0 0 12px rgba(244, 63, 94, 0); }
+        }
+        .dictation-status {
+            font-size: 13px; color: var(--text-secondary);
+            font-style: italic;
+        }
+        .dictation-status.transcribing { color: var(--teal); font-style: normal; font-weight: 500; }
+        .dictation-status.done { color: var(--green); font-style: normal; font-weight: 500; }
+        .dictation-result {
+            display: none;
+            padding: 16px;
+            background: #FFF7ED;
+            border-radius: 10px;
+            border-left: 3px solid var(--rose);
+        }
+        .dictation-result.active { display: block; }
+        .dictation-result-label {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 11px; font-weight: 600;
+            color: var(--rose);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .dictation-result-text {
+            font-size: 14px; color: var(--text);
+            line-height: 1.6;
+        }
+        .medasr-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 10px; font-weight: 600;
+            padding: 2px 8px; border-radius: 4px;
+            background: var(--rose-glow); color: var(--rose);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-top: 8px;
+        }
+        
+        /* Pipeline */
+        .pipeline-card {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 20px 24px;
+            margin-bottom: 24px;
+        }
+        .pipeline-steps {
+            display: flex; align-items: center;
+            justify-content: center; gap: 0;
+            flex-wrap: wrap;
+        }
+        .pipeline-step {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 14px;
+            background: #F8FAFC;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .pipeline-step-icon { font-size: 16px; }
+        .pipeline-step-info { text-align: left; }
+        .pipeline-step-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12px; font-weight: 600; color: var(--text);
+        }
+        .pipeline-step-detail { font-size: 10px; color: var(--text-secondary); }
+        .pipeline-arrow {
+            font-size: 16px; color: var(--teal);
+            padding: 0 6px; font-weight: 700;
+        }
+        .processing-time {
+            text-align: center; margin-top: 12px;
+            font-size: 12px; color: var(--text-secondary);
+        }
+        .processing-time span {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600; color: var(--teal);
+        }
+        
+        /* Buttons */
+        .new-analysis-btn {
+            display: block; width: 100%;
+            padding: 14px;
+            background: var(--navy);
+            color: white; border: none;
+            border-radius: 10px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+            margin-top: 8px;
+        }
+        .new-analysis-btn:hover {
+            background: var(--navy-light);
+            transform: translateY(-1px);
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center; padding: 16px;
+            font-size: 12px; color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            background: white;
+            display: flex; align-items: center;
+            justify-content: center; gap: 12px;
+            flex-wrap: wrap;
+        }
+        .footer-badge {
+            background: var(--navy);
+            color: var(--teal);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 10px; font-weight: 600;
+            padding: 4px 10px; border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Error */
+        .error-msg {
+            display: none;
+            background: var(--red-glow);
+            border: 1px solid rgba(230, 57, 70, 0.3);
+            color: var(--red);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px; margin-top: 16px;
+        }
+        .error-msg.active { display: block; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .results-grid { grid-template-columns: 1fr; }
+            .pipeline-steps { flex-direction: column; }
+            .pipeline-arrow { transform: rotate(90deg); }
+            .header { padding: 0 16px; }
+            .main { padding: 16px; }
+            .verdict-top { flex-direction: column; gap: 16px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo-icon">🔬</div>
+            <span class="logo-text">BreastEdge AI</span>
+            <span class="badge">Edge AI · DGX Spark</span>
+            <span class="model-count-badge">4 HAI-DEF Models</span>
+        </div>
+        <div class="header-right">
+            <div class="system-stat">
+                <span class="system-stat-label">GPU Status</span>
+                <span class="system-stat-value"><span class="status-dot"></span><span id="gpuTemp">--°C</span></span>
+            </div>
+            <div class="system-stat">
+                <span class="system-stat-label">VRAM Usage</span>
+                <span class="system-stat-value" id="vramUsage">-- / -- GB</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main">
+        <!-- UPLOAD -->
+        <section class="upload-section" id="uploadSection">
+            <div class="upload-zone" id="uploadZone">
+                <div class="upload-placeholder">
+                    <div class="upload-icon">🔬</div>
+                    <div class="upload-title">Upload Histopathology Image</div>
+                    <div class="upload-subtitle">Drag & drop or select a breast tissue specimen (PNG, JPG, JPEG)</div>
+                    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                        📁 Choose File
+                    </button>
+                </div>
+                <div class="upload-preview">
+                    <img class="preview-thumb" id="previewThumb" src="" alt="Preview">
+                    <div class="preview-info">
+                        <div class="preview-name" id="previewName">--</div>
+                        <div class="preview-meta" id="previewMeta">--</div>
+                    </div>
+                    <button class="analyze-btn" id="analyzeBtn" onclick="analyzeImage()">
+                        🧬 Analyze Specimen
+                    </button>
+                    <button class="change-btn" onclick="resetUpload()">Change</button>
+                </div>
+            </div>
+            <input type="file" id="fileInput" accept="image/png,image/jpeg,image/jpg" style="display:none">
+            <div class="error-msg" id="errorMsg"></div>
+        </section>
+
+        <!-- LOADING -->
+        <section class="loading-section" id="loadingSection">
+            <div class="spinner"></div>
+            <div class="loading-text">Analyzing specimen...</div>
+            <div class="loading-step" id="loadingStep">Extracting MedSigLIP features</div>
+        </section>
+
+        <!-- RESULTS -->
+        <section class="results-section" id="resultsSection">
+            <!-- Pipeline Card -->
+            <div class="pipeline-card">
+                <div class="pipeline-steps">
+                    <div class="pipeline-step">
+                        <span class="pipeline-step-icon">📷</span>
+                        <div class="pipeline-step-info">
+                            <div class="pipeline-step-name">Input</div>
+                            <div class="pipeline-step-detail">Histopathology patch</div>
+                        </div>
+                    </div>
+                    <span class="pipeline-arrow">→</span>
+                    <div class="pipeline-step">
+                        <span class="pipeline-step-icon">🧠</span>
+                        <div class="pipeline-step-info">
+                            <div class="pipeline-step-name">MedSigLIP-448</div>
+                            <div class="pipeline-step-detail">Feature extraction</div>
+                        </div>
+                    </div>
+                    <span class="pipeline-arrow">→</span>
+                    <div class="pipeline-step">
+                        <span class="pipeline-step-icon">🎯</span>
+                        <div class="pipeline-step-info">
+                            <div class="pipeline-step-name">ResNet50</div>
+                            <div class="pipeline-step-detail">Classification</div>
+                        </div>
+                    </div>
+                    <span class="pipeline-arrow">→</span>
+                    <div class="pipeline-step">
+                        <span class="pipeline-step-icon">💬</span>
+                        <div class="pipeline-step-info">
+                            <div class="pipeline-step-name">MedGemma 1.5</div>
+                            <div class="pipeline-step-detail">Clinical explanation</div>
+                        </div>
+                    </div>
+                    <span class="pipeline-arrow">→</span>
+                    <div class="pipeline-step">
+                        <span class="pipeline-step-icon">🎤</span>
+                        <div class="pipeline-step-info">
+                            <div class="pipeline-step-name">MedASR</div>
+                            <div class="pipeline-step-detail">Voice dictation</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="processing-time">
+                    Processed in <span id="processingTime">--</span> seconds · 4 Google HAI-DEF Models · 100% Local
+                </div>
+            </div>
+
+            <!-- Verdict Card -->
+            <div class="verdict-card" id="verdictCard">
+                <div class="verdict-top">
+                    <div class="verdict-label-group">
+                        <div class="verdict-icon" id="verdictIcon">⚠️</div>
+                        <div>
+                            <div class="verdict-text" id="verdictText">--</div>
+                            <div class="verdict-subtitle" id="verdictSubtitle">Invasive Ductal Carcinoma Detection</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="confidence-value" id="confidenceValue">--%</div>
+                        <div class="confidence-label">Confidence Score</div>
+                    </div>
+                </div>
+                <div class="confidence-bar-container">
+                    <div class="confidence-bar" id="confidenceBar"></div>
+                </div>
+            </div>
+
+            <!-- Images + Explanation Grid -->
+            <div class="results-grid">
+                <!-- Images Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-icon" style="background: var(--teal-glow);">🖼️</div>
+                        <span class="card-header-title">Visual Analysis</span>
+                        <span class="card-header-badge" style="background: var(--teal-glow); color: var(--teal);">MedSigLIP</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="images-grid">
+                            <div class="image-panel">
+                                <div class="image-panel-label">Original Specimen</div>
+                                <img id="resultOriginal" src="" alt="Original">
+                            </div>
+                            <div class="image-panel">
+                                <div class="image-panel-label">Feature Heatmap</div>
+                                <img id="resultHeatmap" src="" alt="Heatmap">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Explanation Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-icon" style="background: var(--purple-glow);">🩺</div>
+                        <span class="card-header-title">Pathologist Analysis</span>
+                        <span class="card-header-badge" style="background: var(--purple-glow); color: var(--purple);">MedGemma 1.5</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="explanation-content" id="explanationContent">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DICTATION SECTION (MedASR) -->
+            <div class="dictation-section active" id="dictationSection">
+                <div class="dictation-card">
+                    <div class="dictation-header">
+                        <div class="dictation-header-icon">🎤</div>
+                        <span class="card-header-title">Pathologist Voice Notes</span>
+                        <span class="card-header-badge" style="background: var(--rose-glow); color: var(--rose);">MedASR</span>
+                    </div>
+                    <div class="dictation-body">
+                        <div class="dictation-controls">
+                            <button class="dictate-btn" id="dictateBtn" onclick="toggleDictation()">
+                                🎤 Ask MedGemma
+                            </button>
+                            <span class="dictation-status" id="dictationStatus">Click to ask MedGemma a question about the specimen</span>
+                        </div>
+                        <div class="dictation-result" id="dictationResult">
+                            <div class="dictation-result-label">🎤 Clinician Question (via MedASR)</div>
+                            <div class="dictation-result-text" id="dictationText"></div>
+                            <div class="medasr-badge">🎤 Transcribed by Google MedASR</div>
+                            <div id="gemmaAnswerSection" style="display:none; margin-top:16px; padding:16px; background:#F0FDF4; border-radius:10px; border-left:3px solid #06D6A0;">
+                                <div style="font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:600; color:#06D6A0; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">💬 MedGemma Response</div>
+                                <div id="gemmaAnswerText" style="font-size:14px; color:#1A1D29; line-height:1.6;"></div>
+                                <div style="display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:600; padding:2px 8px; border-radius:4px; background:rgba(6,214,160,0.1); color:#06D6A0; text-transform:uppercase; letter-spacing:0.5px; margin-top:8px;">💬 Powered by MedGemma 1.5</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="new-analysis-btn" onclick="resetAll()">
+                🔬 New Analysis
+            </button>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <span>Running 100% locally on NVIDIA DGX Spark</span>
+        <span class="footer-badge">Zero Cloud Dependency</span>
+        <span>BreastEdge AI © 2026 Faiz Ferhat</span>
+    </footer>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const uploadZone = document.getElementById('uploadZone');
+        let selectedFile = null;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+
+        // ===== SYSTEM STATUS =====
+        async function updateSystemStatus() {
+            try {
+                const res = await fetch('/api/health');
+                const data = await res.json();
+                document.getElementById('gpuTemp').textContent = data.gpu_temp || '--';
+                document.getElementById('vramUsage').textContent = 
+                    (data.vram_used_gb || '--') + ' / ' + (data.vram_total_gb || '--') + ' GB';
+            } catch(e) {}
+        }
+        updateSystemStatus();
+        setInterval(updateSystemStatus, 10000);
+
+        // ===== DRAG & DROP =====
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            if (!file.type.match('image.*')) {
+                showError('Please select a valid image file (PNG, JPG, JPEG)');
+                return;
+            }
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('previewThumb').src = e.target.result;
+                document.getElementById('previewName').textContent = file.name;
+                document.getElementById('previewMeta').textContent = 
+                    (file.size / 1024).toFixed(1) + ' KB · ' + file.type.split('/')[1].toUpperCase();
+                uploadZone.classList.add('has-image');
+            };
+            reader.readAsDataURL(file);
+            hideError();
+        }
+
+        // ===== ANALYZE =====
+        async function analyzeImage() {
+            if (!selectedFile) return;
+            const btn = document.getElementById('analyzeBtn');
+            btn.disabled = true;
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('loadingSection').classList.add('active');
+            document.getElementById('resultsSection').classList.remove('active');
+
+            const steps = [
+                'Extracting MedSigLIP-448 features...',
+                'Running ResNet50 classification...',
+                'Generating MedGemma 1.5 explanation...',
+                'Building feature heatmap...'
+            ];
+            let stepIdx = 0;
+            const stepInterval = setInterval(() => {
+                stepIdx = (stepIdx + 1) % steps.length;
+                document.getElementById('loadingStep').textContent = steps[stepIdx];
+            }, 2000);
+
+            const startTime = performance.now();
+
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                const res = await fetch('/api/analyze', { method: 'POST', body: formData });
+                if (!res.ok) throw new Error('Analysis failed: ' + res.status);
+                const data = await res.json();
+                const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+                clearInterval(stepInterval);
+                displayResults(data, elapsed);
+            } catch(err) {
+                clearInterval(stepInterval);
+                document.getElementById('loadingSection').classList.remove('active');
+                document.getElementById('uploadSection').style.display = 'block';
+                btn.disabled = false;
+                showError('Analysis failed: ' + err.message);
+            }
+        }
+
+        // ===== DISPLAY RESULTS (MedGemma parsing UNTOUCHED) =====
+        function displayResults(data, elapsed) {
+            document.getElementById('loadingSection').classList.remove('active');
+            document.getElementById('resultsSection').classList.add('active');
+
+            const isMalignant = data.prediction === 'MALIGNANT';
+            const confidence = parseFloat(data.confidence) || 0;
+            const verdictCard = document.getElementById('verdictCard');
+
+            verdictCard.className = 'verdict-card ' + (isMalignant ? 'malignant' : 'benign');
+            document.getElementById('verdictIcon').textContent = isMalignant ? '⚠️' : '✅';
+            document.getElementById('verdictText').textContent = data.prediction;
+            document.getElementById('verdictSubtitle').textContent = isMalignant
+                ? 'Invasive Ductal Carcinoma Detected'
+                : 'No Invasive Ductal Carcinoma Detected';
+            document.getElementById('confidenceValue').textContent = confidence.toFixed(1) + '%';
+
+            setTimeout(() => {
+                document.getElementById('confidenceBar').style.width = confidence + '%';
+            }, 100);
+
+            document.getElementById('processingTime').textContent = elapsed;
+
+            if (selectedFile) {
+                const reader = new FileReader();
+                reader.onload = (e) => { document.getElementById('resultOriginal').src = e.target.result; };
+                reader.readAsDataURL(selectedFile);
+            }
+            if (data.heatmap_base64) {
+                document.getElementById('resultHeatmap').src = 'data:image/png;base64,' + data.heatmap_base64;
+            }
+
+            // Parse explanation — IDENTICAL to original
+            const explanationEl = document.getElementById('explanationContent');
+            explanationEl.innerHTML = '';
+            const explanation = data.explanation || '';
+            const parsed = parseExplanation(explanation);
+
+            const categories = [
+                { key: 'architecture', title: 'Tissue Architecture', icon: '1' },
+                { key: 'cellular', title: 'Cellular Features', icon: '2' },
+                { key: 'clinical', title: 'Clinical Correlation', icon: '3' }
+            ];
+
+            categories.forEach((cat) => {
+                const text = parsed[cat.key];
+                const item = document.createElement('div');
+                item.className = 'explanation-item ' + cat.key;
+                item.innerHTML = `
+                    <div class="explanation-item-number">${cat.icon}</div>
+                    <div class="explanation-item-content">
+                        <div class="explanation-item-title">${cat.title}</div>
+                        <div class="explanation-item-text">${text}</div>
+                    </div>
+                `;
+                explanationEl.appendChild(item);
+            });
+
+            // Reset dictation
+            document.getElementById('dictationResult').classList.remove('active');
+            document.getElementById('dictationText').textContent = '';
+            document.getElementById('dictationStatus').textContent = 'Click to ask MedGemma a question about the specimen';
+            document.getElementById('dictationStatus').className = 'dictation-status';
+            document.getElementById('dictateBtn').classList.remove('recording');
+            document.getElementById('dictateBtn').innerHTML = '🎤 Ask MedGemma';
+        }
+
+        // parseExplanation — EXACT COPY from original, zero changes
+        function parseExplanation(text) {
+            const result = { architecture: '', cellular: '', clinical: '' };
+            text = text.replace(/---/g, '');
+            text = text.replace(/^Your\s*/gm, '');
+            text = text.replace(/```json[\s\S]*?```/g, '');
+            text = text.replace(/\bjson\s*\[.*?\]/g, '');
+            text = text.replace(/\{"box_2d"[^}]*\}/g, '');
+            text = text.replace(/\[\s*\{[^\]]*\]\s*/g, '');
+            text = text.replace(/\n\s*\n+/g, '\n');
+            text = text.trim();
+            const firstOccurrence = text.match(/1[\.)][\s\S]*?2[\.)][\s\S]*?3[\.)][\s\S]*?(?=1[\.]|$)/s);
+            if (firstOccurrence) text = firstOccurrence[0];
+            try {
+                const jsonMatch = text.match(/\{[\s\S]*?\}/);
+                if (jsonMatch) {
+                    const json = JSON.parse(jsonMatch[0]);
+                    if (json.assessment && Array.isArray(json.assessment)) {
+                        json.assessment.forEach((item) => {
+                            const lower = item.toLowerCase();
+                            const cleanText = item.replace(/^\d+\.\s*(Tissue Architecture|Cellular Features|Clinical Correlation)\s*:\s*/i, '');
+                            if (lower.includes('tissue') || lower.includes('architecture') || lower.includes('gland') || lower.includes('ductal')) {
+                                result.architecture = cleanText;
+                            } else if (lower.includes('cellular') || lower.includes('nuclei') || lower.includes('mitot') || lower.includes('atyp')) {
+                                result.cellular = cleanText;
+                            } else if (lower.includes('clinical') || lower.includes('correlation') || lower.includes('finding') || lower.includes('consistent') || lower.includes('suggest')) {
+                                result.clinical = cleanText;
+                            }
+                        });
+                        if (result.architecture && result.cellular && result.clinical) return result;
+                    }
+                }
+            } catch(e) {}
+            const num1 = text.match(/1[\.\)]\s*(.*?)(?=2[\.\)]|$)/s);
+            const num2 = text.match(/2[\.\)]\s*(.*?)(?=3[\.\)]|$)/s);
+            const num3 = text.match(/3[\.\)]\s*(.*?)$/s);
+            if (num1) result.architecture = num1[1].trim();
+            if (num2) result.cellular = num2[1].trim();
+            if (num3) result.clinical = num3[1].trim();
+            if (result.architecture && result.cellular && result.clinical) return result;
+            const sentences = text.split(/[.!]\s+/).filter(s => s.trim().length > 10);
+            if (sentences.length >= 3) {
+                result.architecture = sentences[0].trim() + '.';
+                result.cellular = sentences[1].trim() + '.';
+                result.clinical = sentences.slice(2).join('. ').trim();
+            } else {
+                result.architecture = text.trim();
+            }
+            return result;
+        }
+
+        // ===== DICTATION (MedASR) =====
+        async function toggleDictation() {
+            const btn = document.getElementById('dictateBtn');
+            const status = document.getElementById('dictationStatus');
+
+            if (!isRecording) {
+                // Start recording
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (e) => {
+                        if (e.data.size > 0) audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        stream.getTracks().forEach(t => t.stop());
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        await sendToMedASR(audioBlob);
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    btn.classList.add('recording');
+                    btn.innerHTML = '⏹️ Stop Recording';
+                    status.textContent = 'Recording... Speak your clinical observations';
+                    status.className = 'dictation-status';
+                } catch(err) {
+                    status.textContent = 'Microphone access denied. Please allow microphone access.';
+                    console.error('Mic error:', err);
+                }
+            } else {
+                // Stop recording
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+                isRecording = false;
+                btn.classList.remove('recording');
+                btn.innerHTML = '🎤 Ask MedGemma';
+                status.textContent = 'Transcribing with MedASR...';
+                status.className = 'dictation-status transcribing';
+            }
+        }
+
+        async function sendToMedASR(audioBlob) {
+            const status = document.getElementById('dictationStatus');
+            const resultDiv = document.getElementById('dictationResult');
+            const resultText = document.getElementById('dictationText');
+
+            try {
+                const formData = new FormData();
+                formData.append('file', audioBlob, 'dictation.webm');
+
+                const res = await fetch('/api/transcribe', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await res.json();
+
+                if (data.status === 'success' && data.transcription) {
+                    resultText.textContent = data.transcription;
+                    resultDiv.classList.add('active');
+                    status.textContent = 'Sending to MedGemma...';
+                    status.className = 'dictation-status transcribing';
+                    askMedGemma(data.transcription);
+                } else {
+                    status.textContent = 'Transcription failed: ' + (data.error || 'Unknown error');
+                    status.className = 'dictation-status';
+                }
+            } catch(err) {
+                status.textContent = 'MedASR service unavailable. Start it on port 7861.';
+                status.className = 'dictation-status';
+                console.error('MedASR error:', err);
+            }
+        }
+
+        // ===== MEDGEMMA Q&A =====
+        async function askMedGemma(question) {
+            const status = document.getElementById('dictationStatus');
+            const answerSection = document.getElementById('gemmaAnswerSection');
+            const answerText = document.getElementById('gemmaAnswerText');
+            try {
+                const params = new URLSearchParams();
+                params.append('question', question);
+                const res = await fetch('/api/ask?question=' + encodeURIComponent(question), {
+                    method: 'POST'
+                });
+                const data = await res.json();
+                if (data.status === 'success' && data.answer) {
+                    answerText.textContent = data.answer;
+                    answerSection.style.display = 'block';
+                    status.textContent = 'MedASR → MedGemma pipeline complete';
+                    status.className = 'dictation-status done';
+                } else {
+                    status.textContent = 'MedGemma response failed';
+                    status.className = 'dictation-status';
+                }
+            } catch(err) {
+                status.textContent = 'MedGemma unavailable';
+                console.error('MedGemma Q&A error:', err);
+            }
+        }
+
+        // ===== UTILS =====
+        function resetUpload() {
+            selectedFile = null;
+            fileInput.value = '';
+            uploadZone.classList.remove('has-image');
+            hideError();
+        }
+        function resetAll() {
+            resetUpload();
+            document.getElementById('uploadSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            document.getElementById('confidenceBar').style.width = '0%';
+            document.getElementById('analyzeBtn').disabled = false;
+            document.getElementById('dictationResult').classList.remove('active');
+        }
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.textContent = msg;
+            el.classList.add('active');
+        }
+        function hideError() {
+            document.getElementById('errorMsg').classList.remove('active');
+        }
+    </script>
+</body>
+</html>

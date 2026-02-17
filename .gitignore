@@ -65,3 +65,13 @@ generate_text_screens*.py
 generate_text_screens*.sh
 record_and_edit.sh
 demo_outputs/
+server_v1_backup.py
+server_patch_block.py
+post_production.py
+test_result.json
+validation_results.json
+validation_run.log
+server_broken.py
+*.png
+*.log
+__pycache__/
