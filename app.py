@@ -258,9 +258,9 @@ with gr.Blocks(theme=gr.themes.Soft(), title="BreastEdge AI") as demo:
             3. View prediction, confidence, explanation & features
             
             ### 🎯 Model Info
-            - **Classifier:** ResNet50 (87.92% accuracy)
+            - **Classifier:** ResNet50 (81.85% accuracy)
             - **Training:** 157,572 balanced images
-            - **Metrics:** 91.34% sensitivity, 84.50% specificity
+            - **Metrics:** 85.30% sensitivity, 78.40% specificity
             """)
         
         with gr.Column(scale=2):
