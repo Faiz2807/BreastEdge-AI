@@ -46,3 +46,22 @@ gradio_cached_examples/
 venv/
 env/
 ENV/
+
+# Agent debug files
+GITHUB_SETUP.md
+TOKEN_*.md
+INSTALL_FFMPEG.md
+push_*.sh
+server_broken.py
+QUICK_START.txt
+app_backup.py
+*.out
+.gradio/
+VIDEO_PRODUCTION_GUIDE.md
+VIDEO_SCRIPT.md
+ADVANCED_METRICS_README.md
+FEWSHOT_README.md
+generate_text_screens*.py
+generate_text_screens*.sh
+record_and_edit.sh
+demo_outputs/
